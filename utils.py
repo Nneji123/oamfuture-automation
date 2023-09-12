@@ -367,7 +367,7 @@ def automate_without_proxy():
     numbers = read_numbers_from_csv(number_csv_file)
 
     # Ask the user if they want to run in headless mode
-    headless_input = input("Run in headless mode?\nNote: Headless mode is a way to run a web browser without a graphical user interface (GUI), making it run in the background without displaying a visible browser window.\n (Yes/No): ").lower()
+    headless_input = input("Run in headless mode?\nNote: Headless mode is a way to run a web browser without a graphical user interface (GUI), making it run in the background without displaying a visible browser window.\n(Yes/No): ").lower()
 
     if headless_input == "yes":
         headless_mode = True
@@ -475,7 +475,7 @@ def automate_with_proxy():
     proxies = extract_proxy_data()
     rprint(f"[bold green]Generated {len(proxies)} Proxy Addresses![/bold green]")
 
-    headless_input = input("Run in headless mode?\nNote: Headless mode is a way to run a web browser without a graphical user interface (GUI), making it run in the background without displaying a visible browser window.\n (Yes/No): ").lower()
+    headless_input = input("Run in headless mode?\nNote: Headless mode is a way to run a web browser without a graphical user interface (GUI), making it run in the background without displaying a visible browser window.\n(Yes/No): ").lower()
 
     if headless_input == "yes":
         headless_mode = True
