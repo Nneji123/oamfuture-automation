@@ -42,7 +42,6 @@ def check_internet_access():
     return False
 
 
-
 def get_chrome_version():
     """
     The get_chrome_version function attempts to find the version of Chrome installed on a Windows machine.
@@ -82,7 +81,9 @@ def get_chromedriver_version(chromedriver_path):
         version_string = output.strip().split()[1]
         return version_string
     except subprocess.CalledProcessError as e:
-        rprint(f"[bold red] Error while getting Chromedriver version: {e.output.strip()}[/bold red]")
+        rprint(
+            f"[bold red] Error while getting Chromedriver version: {e.output.strip()}[/bold red]"
+        )
         return None
 
 
@@ -110,7 +111,9 @@ def check_chrome_and_chromedriver():
         rprint("[bold green]Success: Windows OS Detected![/bold green]")
 
     if not check_internet_access():
-        rprint("[bold red]Error: No internet access. Please make sure you are connected to the internet before running this application![/bold red]")
+        rprint(
+            "[bold red]Error: No internet access. Please make sure you are connected to the internet before running this application![/bold red]"
+        )
         time.sleep(5)
         sys.exit(1)
 
@@ -146,7 +149,9 @@ def check_chrome_and_chromedriver():
             chromedriver_first_3 = chromedriver_version.split(".")[0:3]
             chrome_first_3 = chrome_version.split(".")[0:3]
             if chromedriver_first_3 == chrome_first_3:
-                rprint("[bold green]Success: Chromedriver and Chrome versions are compatible.[/bold green]")
+                rprint(
+                    "[bold green]Success: Chromedriver and Chrome versions are compatible.[/bold green]"
+                )
             else:
                 rprint(
                     f"[bold red]Error: Chromedriver(Version {chromedriver_first_3}) and Chrome(Version {chrome_first_3}) versions are not compatible.[/bold red]"
@@ -191,8 +196,6 @@ def generate_random_password(length=8):
     """
     characters = string.ascii_letters + string.digits + string.punctuation
     return "".join(random.choice(characters) for _ in range(length))
-
-
 
 
 def get_free_proxies():
@@ -367,7 +370,9 @@ def automate_without_proxy():
     numbers = read_numbers_from_csv(number_csv_file)
 
     # Ask the user if they want to run in headless mode
-    headless_input = input("Run in headless mode?\nNote: Headless mode is a way to run a web browser without a graphical user interface (GUI), making it run in the background without displaying a visible browser window.\n(Yes/No): ").lower()
+    headless_input = input(
+        "Run in headless mode?\nNote: Headless mode is a way to run a web browser without a graphical user interface (GUI), making it run in the background without displaying a visible browser window.\n(Yes/No): "
+    ).lower()
 
     if headless_input == "yes":
         headless_mode = True
@@ -380,17 +385,23 @@ def automate_without_proxy():
         options.add_argument("--headless")
     rprint("[bold blue]Initializing automation process![/bold blue]")
 
-    options.add_argument("--disable-extensions")  # Disable extensions to prevent additional error messages
-    options.add_argument("--log-level=3")  # Set the log level to suppress error messages
+    options.add_argument(
+        "--disable-extensions"
+    )  # Disable extensions to prevent additional error messages
+    options.add_argument(
+        "--log-level=3"
+    )  # Set the log level to suppress error messages
 
     # Create a desired_capabilities object to further customize the browser behavior
     desired_capabilities = DesiredCapabilities.CHROME.copy()
-    desired_capabilities["pageLoadStrategy"] = "eager"  # Eager page loading to avoid potential issues
-
+    desired_capabilities[
+        "pageLoadStrategy"
+    ] = "eager"  # Eager page loading to avoid potential issues
 
     driver = webdriver.Chrome(
-        options=options, executable_path=r"C:\chromedriver\chromedriver.exe",
-        desired_capabilities=desired_capabilities
+        options=options,
+        executable_path=r"C:\chromedriver\chromedriver.exe",
+        desired_capabilities=desired_capabilities,
     )
 
     website_url = "https://www.oamfuture.com/index/auth/signup.html"
@@ -460,6 +471,7 @@ def automate_without_proxy():
 
     driver.quit()
 
+
 def automate_with_proxy():
     """
     The automate_with_proxy function automates the process of signing up for an account on a website.
@@ -475,7 +487,9 @@ def automate_with_proxy():
     proxies = extract_proxy_data()
     rprint(f"[bold green]Generated {len(proxies)} Proxy Addresses![/bold green]")
 
-    headless_input = input("Run in headless mode?\nNote: Headless mode is a way to run a web browser without a graphical user interface (GUI), making it run in the background without displaying a visible browser window.\n(Yes/No): ").lower()
+    headless_input = input(
+        "Run in headless mode?\nNote: Headless mode is a way to run a web browser without a graphical user interface (GUI), making it run in the background without displaying a visible browser window.\n(Yes/No): "
+    ).lower()
 
     if headless_input == "yes":
         headless_mode = True
@@ -495,10 +509,10 @@ def automate_with_proxy():
     desired_capabilities = DesiredCapabilities.CHROME.copy()
     desired_capabilities["pageLoadStrategy"] = "eager"
 
-
     driver = webdriver.Chrome(
-        options=options, executable_path=r"C:\chromedriver\chromedriver.exe",
-        desired_capabilities=desired_capabilities
+        options=options,
+        executable_path=r"C:\chromedriver\chromedriver.exe",
+        desired_capabilities=desired_capabilities,
     )
 
     website_url = "https://www.oamfuture.com/index/auth/signup.html"
@@ -517,15 +531,16 @@ def automate_with_proxy():
             proxy_str = f"{proxy_address}:{proxy_port}"
             options.add_argument(f"--proxy-server={proxy_str}")
 
-
             driver.quit()  # Close the current driver with the old proxy
             driver = webdriver.Chrome(
                 chrome_options=options,
                 executable_path=r"C:\chromedriver\chromedriver.exe",
-                desired_capabilities=desired_capabilities
+                desired_capabilities=desired_capabilities,
             )
 
-            rprint(f"Using Proxy with IP Address: {proxy_address} at Port: {proxy_port}")
+            rprint(
+                f"Using Proxy with IP Address: {proxy_address} at Port: {proxy_port}"
+            )
         try:
             driver.get(website_url)
 

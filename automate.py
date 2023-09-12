@@ -2,7 +2,11 @@ import pyfiglet
 from rich.console import Console
 from rich import print as rprint
 
-from utils import  automate_with_proxy, automate_without_proxy, check_chrome_and_chromedriver
+from utils import (
+    automate_with_proxy,
+    automate_without_proxy,
+    check_chrome_and_chromedriver,
+)
 
 
 def main():
