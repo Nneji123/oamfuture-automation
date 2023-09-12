@@ -9,6 +9,7 @@ import random
 import string
 import subprocess
 import sys
+import time
 
 from win32com.client import Dispatch
 
@@ -50,9 +51,10 @@ def is_windows():
 def check_chrome_and_chromedriver():
     if not is_windows():
         print("This script is intended for Windows only.")
+        time.sleep(5)
         sys.exit(1)
     else:
-        print("Windows OS Detected...")
+        print("Windows OS Detected!")
 
     # Check if Chrome is installed using win32com.client
     chrome_paths = [
@@ -64,6 +66,7 @@ def check_chrome_and_chromedriver():
         print(
             "Chrome browser is not installed. Please install Chrome from 'https://www.google.com/chrome/' and try again."
         )
+        time.sleep(5)
         sys.exit(1)
 
     # Check if Chromedriver is in the specified path
@@ -73,6 +76,7 @@ def check_chrome_and_chromedriver():
         print(
             "Please download Chromedriver from 'https://chromedriver.chromium.org/downloads' and place it in C:\\chromedriver\\chromedriver.exe"
         )
+        time.sleep(5)
         sys.exit(1)
 
     # Check Chromedriver version
@@ -92,10 +96,16 @@ def check_chrome_and_chromedriver():
                 print("Chromedriver and Chrome versions are compatible.")
             else:
                 print("Chromedriver and Chrome versions are not compatible.")
+                time.sleep(5)
+                sys.exit(1)
         else:
             print("Could not determine Chrome version.")
+            time.sleep(5)
+            sys.exit(1)
     else:
         print("Could not determine Chromedriver version.")
+        time.sleep(5)
+        sys.exit(1)
 
 
 # Function to read numbers from a CSV file
