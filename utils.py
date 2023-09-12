@@ -91,7 +91,6 @@ def is_windows():
     """
     The is_windows function returns True if the platform is Windows, False otherwise.
 
-
     :return: True if the platform is windows
     """
     return sys.platform.startswith("win")
@@ -101,7 +100,6 @@ def check_chrome_and_chromedriver():
     """
     The check_chrome_and_chromedriver function checks to see if Chrome and Chromedriver are installed on the system.
     If they are not, it will exit with an error message. If they are installed, it will check to make sure that the versions of Chrome and Chromedriver match up.
-
     """
     if not is_windows():
         rprint("[bold red]Error: This script is intended for Windows only.[/bold red]")
@@ -238,7 +236,6 @@ def extract_proxy_data():
     The extract_proxy_data function is used to extract the proxy data.
     :return: A list of dictionaries
     """
-
     free_proxies = get_free_proxies()
 
     proxy_list = [
@@ -266,8 +263,7 @@ def update_csv_file(csv_file_path, number_to_update, new_status):
         for row in reader:
             data.append(row)
 
-    # Iterate through the data and update previous rows with blank status
-    found = False  # Flag to indicate if the current row was found
+    found = False
     for row in data:
         if row["Numbers"] == number_to_update:
             found = True
@@ -387,16 +383,15 @@ def automate_without_proxy():
 
     options.add_argument(
         "--disable-extensions"
-    )  # Disable extensions to prevent additional error messages
+    )
     options.add_argument(
         "--log-level=3"
-    )  # Set the log level to suppress error messages
+    )
 
-    # Create a desired_capabilities object to further customize the browser behavior
     desired_capabilities = DesiredCapabilities.CHROME.copy()
     desired_capabilities[
         "pageLoadStrategy"
-    ] = "eager"  # Eager page loading to avoid potential issues
+    ] = "eager"
 
     driver = webdriver.Chrome(
         options=options,
