@@ -5,22 +5,30 @@ Utility functions.
 import csv
 import os
 import random
-import requests
 import string
 import subprocess
 import sys
 import time
 
+import requests
 import tqdm
+from rich import print as rprint
+from rich.prompt import Prompt
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from win32com.client import Dispatch
+
+
+visit_count = 0
 
 
 def check_internet_access():
     """
     The check_internet_access function checks if the user has internet access.
-        If the user does not have internet access, then a message is printed to the console and
+        If the user does not have internet access, then a message is rprinted to the console and
         an error code of 1 is returned. Otherwise, nothing happens.
 
     :return: A boolean value
@@ -56,7 +64,7 @@ def get_chrome_version():
             except Exception:
                 pass
     except Exception as e:
-        print(f"Error: {e}")
+        rprint(f"[bold red] Error: {e}[/bold red]")
     return None
 
 
@@ -74,7 +82,7 @@ def get_chromedriver_version(chromedriver_path):
         version_string = output.strip().split()[1]
         return version_string
     except subprocess.CalledProcessError as e:
-        print(f"Error while getting Chromedriver version: {e.output.strip()}")
+        rprint(f"[bold red] Error while getting Chromedriver version: {e.output.strip()}[/bold red]")
         return None
 
 
@@ -95,14 +103,14 @@ def check_chrome_and_chromedriver():
 
     """
     if not is_windows():
-        print("This script is intended for Windows only.")
+        rprint("[bold red]Error: This script is intended for Windows only.[/bold red]")
         time.sleep(5)
         sys.exit(1)
     else:
-        print("Windows OS Detected!")
+        rprint("[bold green]Success: Windows OS Detected![/bold green]")
 
     if not check_internet_access():
-        print("No internet access. Please make sure you are connected to the internet before running this application!")
+        rprint("[bold red]Error: No internet access. Please make sure you are connected to the internet before running this application![/bold red]")
         time.sleep(5)
         sys.exit(1)
 
@@ -112,17 +120,17 @@ def check_chrome_and_chromedriver():
     ]
     chrome_installed = any(os.path.exists(path) for path in chrome_paths)
     if not chrome_installed:
-        print(
-            "Chrome browser is not installed. Please install Chrome from 'https://www.google.com/chrome/' and try again."
+        rprint(
+            "[bold red]Error: Chrome browser is not installed. Please install Chrome from 'https://www.google.com/chrome/' and try again.[/bold red]"
         )
         time.sleep(5)
         sys.exit(1)
 
     chromedriver_path = r"C:\chromedriver\chromedriver.exe"
     if not os.path.exists(chromedriver_path):
-        print(f"Chromedriver not found at: {chromedriver_path}")
-        print(
-            "Please download Chromedriver from 'https://chromedriver.chromium.org/downloads' and place it in C:\\chromedriver\\chromedriver.exe"
+        rprint(f"Chromedriver not found at: {chromedriver_path}")
+        rprint(
+            "[bold red]Error: Please download Chromedriver from 'https://chromedriver.chromium.org/downloads' and place it in C:\\chromedriver\\chromedriver.exe[/bold red]"
         )
         time.sleep(5)
         sys.exit(1)
@@ -130,27 +138,27 @@ def check_chrome_and_chromedriver():
     chromedriver_version = get_chromedriver_version(chromedriver_path)
 
     if chromedriver_version:
-        print(f"Chromedriver Version: {chromedriver_version}")
+        rprint(f"Chromedriver Version: {chromedriver_version}")
         chrome_version = get_chrome_version()
         if chrome_version:
-            print(f"Chrome Version: {chrome_version}")
+            rprint(f"Chrome Version: {chrome_version}")
 
             chromedriver_first_3 = chromedriver_version.split(".")[0:3]
             chrome_first_3 = chrome_version.split(".")[0:3]
             if chromedriver_first_3 == chrome_first_3:
-                print("Chromedriver and Chrome versions are compatible.")
+                rprint("[bold green]Success: Chromedriver and Chrome versions are compatible.[/bold green]")
             else:
-                print(
-                    f"Chromedriver(Version {chromedriver_first_3}) and Chrome(Version {chrome_first_3}) versions are not compatible."
+                rprint(
+                    f"[bold red]Error: Chromedriver(Version {chromedriver_first_3}) and Chrome(Version {chrome_first_3}) versions are not compatible.[/bold red]"
                 )
                 time.sleep(5)
                 sys.exit(1)
         else:
-            print("Could not determine Chrome version.")
+            rprint("[bold red]Error: Could not determine Chrome version.[/bold red]")
             time.sleep(5)
             sys.exit(1)
     else:
-        print("Could not determine Chromedriver version.")
+        rprint("[bold red]Error: Could not determine Chromedriver version.[/bold red]")
         time.sleep(5)
         sys.exit(1)
 
@@ -185,12 +193,7 @@ def generate_random_password(length=8):
     return "".join(random.choice(characters) for _ in range(length))
 
 
-options = webdriver.ChromeOptions()
-options.add_argument("--headless")
 
-driver = webdriver.Chrome(
-    chrome_options=options, executable_path=r"C:\chromedriver\chromedriver.exe"
-)
 
 def get_free_proxies():
     """
@@ -198,7 +201,12 @@ def get_free_proxies():
 
     :return: A list of dictionaries
     """
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
 
+    driver = webdriver.Chrome(
+        chrome_options=options, executable_path=r"C:\chromedriver\chromedriver.exe"
+    )
     driver.get("https://sslproxies.org")
 
     table = driver.find_element(By.TAG_NAME, "table")
@@ -210,12 +218,14 @@ def get_free_proxies():
         headers.append(th.text.strip())
 
     proxies = []
-    for tr in tqdm.tqdm(tbody, desc="Scraping Proxies"):
+    for tr in tqdm.tqdm(tbody, desc="Scraping Proxies", colour="green"):
         proxy_data = {}
         tds = tr.find_elements(By.TAG_NAME, "td")
         for i in range(len(headers)):
             proxy_data[headers[i]] = tds[i].text.strip()
         proxies.append(proxy_data)
+
+    driver.quit()
 
     return proxies
 
@@ -232,7 +242,6 @@ def extract_proxy_data():
         {"IP Address": proxy["IP Address"], "Port": proxy["Port"]}
         for proxy in free_proxies
     ]
-    driver.quit()
 
     return proxy_list
 
@@ -306,19 +315,35 @@ def create_number_csv_file():
     The create_number_csv_file function generates a CSV file with the following columns:
         - Numbers (a column of random numbers)
         - Status (a column of statuses corresponding to each number in the Numbers column)
-
     """
-    if os.path.exists("numbers_status.csv"):
-        os.system("rm -rf numbers_status.csv")
-    else:
-        pass
-    max_possible_numbers = 10**5
+    num_records = 10**5
+    csv_file_name = "numbers_status.csv"
 
-    num_records = max_possible_numbers
+    # Check if the file already exists and handle it
+    if os.path.exists(csv_file_name):
+        options = ["Delete", "Rename", "Keep"]
+        choice = Prompt.ask(
+            f"The CSV file '{csv_file_name}' already exists. What would you like to do?",
+            choices=options,
+        )
+
+        if choice == "Delete":
+            os.remove(csv_file_name)
+        elif choice == "Rename":
+            suffix = 1
+            while True:
+                new_csv_file_name = f"numbers_status_{suffix}.csv"
+                if not os.path.exists(new_csv_file_name):
+                    os.rename(csv_file_name, new_csv_file_name)
+                    break
+                suffix += 1
+            print(f"The CSV file has been renamed to '{new_csv_file_name}'.")
+        else:
+            print("The existing CSV file will be kept.")
+    else:
+        print(f"The CSV file '{csv_file_name}' does not exist.")
 
     data_to_write = generate_numbers_and_statuses(num_records)
-
-    csv_file_name = "numbers_status.csv"
 
     with open(csv_file_name, mode="w", newline="") as file:
         fieldnames = ["Numbers", "Status"]
@@ -328,6 +353,243 @@ def create_number_csv_file():
         for row in data_to_write:
             writer.writerow(row)
 
-    print(
-        f"{num_records} numbers with statuses have been generated and saved to {csv_file_name}."
+    rprint(
+        f"[bold green]Success: {num_records} numbers with statuses have been generated and saved to {csv_file_name}.[/bold green]"
     )
+
+
+def automate_without_proxy():
+    """
+    The automate_without_proxy function automates the process of signing up for an account on a website.
+    """
+    create_number_csv_file()
+    number_csv_file = "numbers_status.csv"
+    numbers = read_numbers_from_csv(number_csv_file)
+
+    # Ask the user if they want to run in headless mode
+    headless_input = input("Run in headless mode?\nNote: Headless mode is a way to run a web browser without a graphical user interface (GUI), making it run in the background without displaying a visible browser window.\n (Yes/No): ").lower()
+
+    if headless_input == "yes":
+        headless_mode = True
+    else:
+        headless_mode = False
+
+    options = webdriver.ChromeOptions()
+
+    if headless_mode:
+        options.add_argument("--headless")
+    rprint("[bold blue]Initializing automation process![/bold blue]")
+
+    options.add_argument("--disable-extensions")  # Disable extensions to prevent additional error messages
+    options.add_argument("--log-level=3")  # Set the log level to suppress error messages
+
+    # Create a desired_capabilities object to further customize the browser behavior
+    desired_capabilities = DesiredCapabilities.CHROME.copy()
+    desired_capabilities["pageLoadStrategy"] = "eager"  # Eager page loading to avoid potential issues
+
+
+    driver = webdriver.Chrome(
+        options=options, executable_path=r"C:\chromedriver\chromedriver.exe",
+        desired_capabilities=desired_capabilities
+    )
+
+    website_url = "https://www.oamfuture.com/index/auth/signup.html"
+    for number in numbers:
+        driver.get(website_url)
+
+        form_field = driver.find_element(
+            By.XPATH, '//*[@id="signup-form"]/div[1]/input'
+        )
+        form_field.clear()
+        form_field.send_keys(number)
+
+        password1 = generate_random_password()
+        password2 = password1
+
+        password_field1 = driver.find_element(
+            By.XPATH, '//*[@id="signup-form"]/div[2]/input'
+        )
+        password_field2 = driver.find_element(
+            By.XPATH, '//*[@id="signup-form"]/div[3]/input'
+        )
+        password_field1.send_keys(password1)
+        password_field2.send_keys(password2)
+
+        button = driver.find_element(
+            By.XPATH, '//*[@id="signup-form"]/div[5]/div/input'
+        )
+        button.click()
+
+        try:
+            text = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, '//div[@class="mui-popup-text"]')
+                )
+            )
+            text_value = text.text.strip()
+            if text_value == "success":
+                rprint(f"[bold green]Success[/bold green] for Number: {number}")
+                update_csv_file(
+                    csv_file_path="numbers_status.csv",
+                    number_to_update=number,
+                    new_status="success",
+                )
+            elif text_value == "fail":
+                rprint(f"[bold red]Fail[/bold red] for Number: {number}")
+                update_csv_file(
+                    csv_file_path="numbers_status.csv",
+                    number_to_update=number,
+                    new_status="fail",
+                )
+            else:
+                rprint(f"[bold red]Unexpected text: {text_value}[/bold red]")
+                update_csv_file(
+                    csv_file_path="numbers_status.csv",
+                    number_to_update=number,
+                    new_status="fail",
+                )
+        except:
+            rprint(f"[bold red]No text found for Number: {number}[/bold red]")
+            update_csv_file(
+                csv_file_path="numbers_status.csv",
+                number_to_update=number,
+                new_status="fail",
+            )
+        time.sleep(5)
+        driver.refresh()
+
+    driver.quit()
+
+def automate_with_proxy():
+    """
+    The automate_with_proxy function automates the process of signing up for an account on a website.
+    It uses a CSV file containing phone numbers to sign up with, and proxies from https://free-proxy-list.net/
+    to make each request unique.
+
+    :return: A list of dictionaries
+    """
+    create_number_csv_file()
+    number_csv_file = "numbers_status.csv"
+    numbers = read_numbers_from_csv(number_csv_file)
+
+    proxies = extract_proxy_data()
+    rprint(f"[bold green]Generated {len(proxies)} Proxy Addresses![/bold green]")
+
+    headless_input = input("Run in headless mode?\nNote: Headless mode is a way to run a web browser without a graphical user interface (GUI), making it run in the background without displaying a visible browser window.\n (Yes/No): ").lower()
+
+    if headless_input == "yes":
+        headless_mode = True
+    else:
+        headless_mode = False
+
+    options = webdriver.ChromeOptions()
+
+    if headless_mode:
+        options.add_argument("--headless")
+
+    rprint("[bold blue]Initializing automation process![/bold blue]")
+
+    options.add_argument("--disable-extensions")
+    options.add_argument("--log-level=3")
+
+    desired_capabilities = DesiredCapabilities.CHROME.copy()
+    desired_capabilities["pageLoadStrategy"] = "eager"
+
+
+    driver = webdriver.Chrome(
+        options=options, executable_path=r"C:\chromedriver\chromedriver.exe",
+        desired_capabilities=desired_capabilities
+    )
+
+    website_url = "https://www.oamfuture.com/index/auth/signup.html"
+
+    global visit_count
+
+    for number in numbers:
+        visit_count += 1
+
+        # Check if it's time to change the proxy
+        if visit_count % 5 == 0:
+            proxy = random.choice(proxies)
+            proxy_address = proxy["IP Address"]
+            proxy_port = proxy["Port"]
+
+            proxy_str = f"{proxy_address}:{proxy_port}"
+            options.add_argument(f"--proxy-server={proxy_str}")
+
+
+            driver.quit()  # Close the current driver with the old proxy
+            driver = webdriver.Chrome(
+                chrome_options=options,
+                executable_path=r"C:\chromedriver\chromedriver.exe",
+                desired_capabilities=desired_capabilities
+            )
+
+            rprint(f"Using Proxy with IP Address: {proxy_address} at Port: {proxy_port}")
+        try:
+            driver.get(website_url)
+
+            form_field = driver.find_element(
+                By.XPATH, '//*[@id="signup-form"]/div[1]/input'
+            )
+            form_field.clear()
+            form_field.send_keys(number)
+
+            password1 = generate_random_password()
+            password2 = password1
+
+            password_field1 = driver.find_element(
+                By.XPATH, '//*[@id="signup-form"]/div[2]/input'
+            )
+            password_field2 = driver.find_element(
+                By.XPATH, '//*[@id="signup-form"]/div[3]/input'
+            )
+            password_field1.send_keys(password1)
+            password_field2.send_keys(password2)
+
+            button = driver.find_element(
+                By.XPATH, '//*[@id="signup-form"]/div[5]/div/input'
+            )
+            button.click()
+
+            try:
+                text = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located(
+                        (By.XPATH, '//div[@class="mui-popup-text"]')
+                    )
+                )
+                text_value = text.text.strip()
+                if text_value == "success":
+                    rprint(f"[bold green]Success[/bold green] for Number: {number}")
+                    update_csv_file(
+                        csv_file_path="numbers_status.csv",
+                        number_to_update=number,
+                        new_status="success",
+                    )
+                elif text_value == "fail":
+                    rprint(f"[bold red]Fail[/bold red] for Number: {number}")
+                    update_csv_file(
+                        csv_file_path="numbers_status.csv",
+                        number_to_update=number,
+                        new_status="fail",
+                    )
+                else:
+                    rprint(f"[bold red]Unexpected text: {text_value}[/bold red]")
+                    update_csv_file(
+                        csv_file_path="numbers_status.csv",
+                        number_to_update=number,
+                        new_status="fail",
+                    )
+            except:
+                rprint(f"[bold red]No text found for Number: {number}[/bold red]")
+                update_csv_file(
+                    csv_file_path="numbers_status.csv",
+                    number_to_update=number,
+                    new_status="fail",
+                )
+            time.sleep(10)
+            driver.refresh()
+        except Exception as e:
+            rprint(f"Error occured {e}")
+
+    driver.quit()
