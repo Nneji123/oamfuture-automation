@@ -1,4 +1,5 @@
 import csv
+import os
 import random
 
 
@@ -20,27 +21,32 @@ def generate_numbers_and_statuses(num_count):
     return data
 
 
-# Calculate the maximum possible number of unique numbers
-max_possible_numbers = 10**5
+def create_number_csv_file():
+    if os.path.exists("generated_numbers.csv"):
+        os.system("rm -rf generated_numbers.csv")
+    else:
+        pass
+    # Calculate the maximum possible number of unique numbers
+    max_possible_numbers = 10**5
 
-# Set num_records to the maximum possible
-num_records = max_possible_numbers
+    # Set num_records to the maximum possible
+    num_records = max_possible_numbers
 
-# Generate the data
-data_to_write = generate_numbers_and_statuses(num_records)
+    # Generate the data
+    data_to_write = generate_numbers_and_statuses(num_records)
 
-# Specify the CSV file name
-csv_file_name = "generated_numbers.csv"
+    # Specify the CSV file name
+    csv_file_name = "generated_numbers.csv"
 
-# Write the data to the CSV file
-with open(csv_file_name, mode="w", newline="") as file:
-    fieldnames = ["Numbers", "Status"]
-    writer = csv.DictWriter(file, fieldnames=fieldnames)
+    # Write the data to the CSV file
+    with open(csv_file_name, mode="w", newline="") as file:
+        fieldnames = ["Numbers", "Status"]
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
 
-    writer.writeheader()
-    for row in data_to_write:
-        writer.writerow(row)
+        writer.writeheader()
+        for row in data_to_write:
+            writer.writerow(row)
 
-print(
-    f"{num_records} numbers with statuses have been generated and saved to {csv_file_name}."
-)
+    print(
+        f"{num_records} numbers with statuses have been generated and saved to {csv_file_name}."
+    )

@@ -23,7 +23,6 @@ def get_chrome_version():
         for path in paths:
             try:
                 version = parser.GetFileVersion(path)
-                print(version)
                 return version
             except Exception:
                 pass
@@ -52,22 +51,28 @@ def check_chrome_and_chromedriver():
     if not is_windows():
         print("This script is intended for Windows only.")
         sys.exit(1)
+    else:
+        print("Windows OS Detected...")
 
     # Check if Chrome is installed using win32com.client
     chrome_paths = [
         r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
     ]
     chrome_installed = any(os.path.exists(path) for path in chrome_paths)
     if not chrome_installed:
-        print("Chrome browser is not installed. Please install Chrome from 'https://www.google.com/chrome/' and try again.")
+        print(
+            "Chrome browser is not installed. Please install Chrome from 'https://www.google.com/chrome/' and try again."
+        )
         sys.exit(1)
 
     # Check if Chromedriver is in the specified path
-    chromedriver_path = r'C:\chromedriver\chromedriver.exe'
+    chromedriver_path = r"C:\chromedriver\chromedriver.exe"
     if not os.path.exists(chromedriver_path):
         print(f"Chromedriver not found at: {chromedriver_path}")
-        print("Please download Chromedriver from 'https://chromedriver.chromium.org/downloads' and place it in C:\\chromedriver\\chromedriver.exe")
+        print(
+            "Please download Chromedriver from 'https://chromedriver.chromium.org/downloads' and place it in C:\\chromedriver\\chromedriver.exe"
+        )
         sys.exit(1)
 
     # Check Chromedriver version
@@ -81,10 +86,8 @@ def check_chrome_and_chromedriver():
             print(f"Chrome Version: {chrome_version}")
 
             # Extract the first 3 digits of the version numbers
-            chromedriver_first_3 = chromedriver_version.split('.')[0:3]
-            chrome_first_3 = chrome_version.split('.')[0:3]
-            print(chromedriver_first_3)
-            print(chrome_first_3)
+            chromedriver_first_3 = chromedriver_version.split(".")[0:3]
+            chrome_first_3 = chrome_version.split(".")[0:3]
             if chromedriver_first_3 == chrome_first_3:
                 print("Chromedriver and Chrome versions are compatible.")
             else:
@@ -152,6 +155,3 @@ def update_csv_file(csv_file_path, number_to_update, new_status):
     print(
         f"Status updated to '{new_status}' for number '{number_to_update}' in the CSV file."
     )
-
-
-check_chrome_and_chromedriver()
