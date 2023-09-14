@@ -16,6 +16,7 @@ from rich import print as rprint
 from rich.prompt import Prompt
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -219,7 +220,7 @@ def get_free_proxies():
         headers.append(th.text.strip())
 
     proxies = []
-    for tr in tqdm.tqdm(tbody, desc="Scraping Proxies", colour="green"):
+    for tr in tqdm.tqdm(tbody, desc="Generating IP's", colour="green"):
         proxy_data = {}
         tds = tr.find_elements(By.TAG_NAME, "td")
         for i in range(len(headers)):
@@ -324,7 +325,7 @@ def create_number_csv_file():
         choice = Prompt.ask(
             f"The CSV file '{csv_file_name}' already exists. What would you like to do?",
             choices=options,
-        )
+        ).title()
 
         if choice == "Delete":
             os.remove(csv_file_name)
@@ -357,9 +358,11 @@ def create_number_csv_file():
     )
 
 
-def automate_without_proxy():
+def automate_without_proxy(interval_time: int):
     """
     The automate_without_proxy function automates the process of signing up for an account on a website.
+    :param interval_time: Time it takes for page to refresh(in seconds)
+
     """
     create_number_csv_file()
     number_csv_file = "numbers_status.csv"
@@ -461,17 +464,18 @@ def automate_without_proxy():
                 number_to_update=number,
                 new_status="fail",
             )
-        time.sleep(5)
+        time.sleep(interval_time)
         driver.refresh()
 
     driver.quit()
 
 
-def automate_with_proxy():
+def automate_with_proxy(interval_time: int):
     """
     The automate_with_proxy function automates the process of signing up for an account on a website.
     It uses a CSV file containing phone numbers to sign up with, and proxies from https://free-proxy-list.net/
     to make each request unique.
+    :param interval_time: Time it takes for page to refresh(in seconds)
 
     :return: A list of dictionaries
     """
@@ -480,7 +484,7 @@ def automate_with_proxy():
     numbers = read_numbers_from_csv(number_csv_file)
 
     proxies = extract_proxy_data()
-    rprint(f"[bold green]Generated {len(proxies)} Proxy Addresses![/bold green]")
+    rprint(f"[bold green]Generated {len(proxies)} IP Addresses![/bold green]")
 
     headless_input = input(
         "Run in headless mode?\nNote: Headless mode is a way to run a web browser without a graphical user interface (GUI), making it run in the background without displaying a visible browser window.\n(Yes/No): "
@@ -496,7 +500,7 @@ def automate_with_proxy():
     if headless_mode:
         options.add_argument("--headless")
 
-    rprint("[bold blue]Initializing automation process![/bold blue]")
+    rprint("[bold blue]Initializing automation process using Rotating IP Method![/bold blue]")
 
     options.add_argument("--disable-extensions")
     options.add_argument("--log-level=3")
@@ -534,7 +538,7 @@ def automate_with_proxy():
             )
 
             rprint(
-                f"Using Proxy with IP Address: {proxy_address} at Port: {proxy_port}"
+                f"Using IP Address: {proxy_address} at Port: {proxy_port}"
             )
         try:
             driver.get(website_url)
@@ -597,9 +601,9 @@ def automate_with_proxy():
                     number_to_update=number,
                     new_status="fail",
                 )
-            time.sleep(10)
+            time.sleep(interval_time)
             driver.refresh()
-        except Exception as e:
-            rprint(f"Error occured {e}")
+        except Exception:
+            rprint(f"Error occured for Number: {number} using IP Address: {proxy_address} at Port: {proxy_port}")
 
     driver.quit()
