@@ -1,12 +1,9 @@
 import pyfiglet
-from rich.console import Console
 from rich import print as rprint
+from rich.console import Console
 
-from utils import (
-    automate_with_proxy,
-    automate_without_proxy,
-    check_chrome_and_chromedriver,
-)
+from utils import (automate_with_proxy, automate_without_proxy,
+                   check_chrome_and_chromedriver)
 
 
 def main():
@@ -23,13 +20,19 @@ def main():
             choice_time = int(input("Enter Refresh time interval (in seconds): "))
             automate_with_proxy(interval_time=choice_time)
         except ValueError:
-            console.print("Invalid input for time interval. Please enter a valid integer.", style="bold red")
+            console.print(
+                "Invalid input for time interval. Please enter a valid integer.",
+                style="bold red",
+            )
     elif choice == "2":
         try:
             choice_time = int(input("Enter Refresh time interval (in seconds): "))
             automate_without_proxy(interval_time=choice_time)
         except ValueError:
-            console.print("Invalid input for time interval. Please enter a valid integer.", style="bold red")
+            console.print(
+                "Invalid input for time interval. Please enter a valid integer.",
+                style="bold red",
+            )
     else:
         console.print("Invalid choice. Please enter 1 or 2.", style="bold red")
 

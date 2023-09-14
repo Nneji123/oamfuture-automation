@@ -15,13 +15,12 @@ import tqdm
 from rich import print as rprint
 from rich.prompt import Prompt
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from win32com.client import Dispatch
-
 
 visit_count = 0
 
@@ -384,17 +383,11 @@ def automate_without_proxy(interval_time: int):
         options.add_argument("--headless")
     rprint("[bold blue]Initializing automation process![/bold blue]")
 
-    options.add_argument(
-        "--disable-extensions"
-    )
-    options.add_argument(
-        "--log-level=3"
-    )
+    options.add_argument("--disable-extensions")
+    options.add_argument("--log-level=3")
 
     desired_capabilities = DesiredCapabilities.CHROME.copy()
-    desired_capabilities[
-        "pageLoadStrategy"
-    ] = "eager"
+    desired_capabilities["pageLoadStrategy"] = "eager"
 
     driver = webdriver.Chrome(
         options=options,
@@ -500,7 +493,9 @@ def automate_with_proxy(interval_time: int):
     if headless_mode:
         options.add_argument("--headless")
 
-    rprint("[bold blue]Initializing automation process using Rotating IP Method![/bold blue]")
+    rprint(
+        "[bold blue]Initializing automation process using Rotating IP Method![/bold blue]"
+    )
 
     options.add_argument("--disable-extensions")
     options.add_argument("--log-level=3")
@@ -537,9 +532,7 @@ def automate_with_proxy(interval_time: int):
                 desired_capabilities=desired_capabilities,
             )
 
-            rprint(
-                f"Using IP Address: {proxy_address} at Port: {proxy_port}"
-            )
+            rprint(f"Using IP Address: {proxy_address} at Port: {proxy_port}")
         try:
             driver.get(website_url)
 
@@ -604,6 +597,8 @@ def automate_with_proxy(interval_time: int):
             time.sleep(interval_time)
             driver.refresh()
         except Exception:
-            rprint(f"Error occured for Number: {number} using IP Address: {proxy_address} at Port: {proxy_port}")
+            rprint(
+                f"Error occured for Number: {number} using IP Address: {proxy_address} at Port: {proxy_port}"
+            )
 
     driver.quit()
