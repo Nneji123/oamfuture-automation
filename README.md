@@ -10,6 +10,10 @@ This automation script simplifies the process of signing up for an account on a 
 - Automates filling out the signup form with random numbers.
 - Supports proxy rotation for anonymity.
 
+## Screenshot
+
+![Screenshot (559)](https://github.com/Nneji123/oamfuture-automation/assets/101701760/fb4dcaff-1b3d-49ce-8850-a0c1d93a5649)
+
 ## Prerequisites
 
 Before using this automation script, ensure you have the following prerequisites installed:
