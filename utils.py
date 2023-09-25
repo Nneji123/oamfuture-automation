@@ -462,6 +462,18 @@ def automate_without_proxy(interval_time: int):
 
     driver.quit()
 
+def test_proxy(proxy_address, proxy_port):
+    """
+    Test if a proxy is working by making a test request.
+    Returns True if the proxy works, False otherwise.
+    """
+    proxy_url = f"http://{proxy_address}:{proxy_port}"
+    try:
+        response = requests.get("https://www.example.com", proxies={"http": proxy_url, "https": proxy_url}, timeout=5)
+        return response.status_code == 200
+    except requests.RequestException:
+        return False
+
 
 def automate_with_proxy(interval_time: int):
     """
@@ -522,17 +534,21 @@ def automate_with_proxy(interval_time: int):
             proxy_address = proxy["IP Address"]
             proxy_port = proxy["Port"]
 
-            proxy_str = f"{proxy_address}:{proxy_port}"
-            options.add_argument(f"--proxy-server={proxy_str}")
+            if test_proxy(proxy_address, proxy_port):
+                proxy_str = f"{proxy_address}:{proxy_port}"
+                options.add_argument(f"--proxy-server={proxy_str}")
 
-            driver.quit()  # Close the current driver with the old proxy
-            driver = webdriver.Chrome(
-                chrome_options=options,
-                executable_path=r"C:\chromedriver\chromedriver.exe",
-                desired_capabilities=desired_capabilities,
-            )
+                driver.quit()  # Close the current driver with the old proxy
+                driver = webdriver.Chrome(
+                    chrome_options=options,
+                    executable_path=r"C:\chromedriver\chromedriver.exe",
+                    desired_capabilities=desired_capabilities,
+                )
 
-            rprint(f"Using IP Address: {proxy_address} at Port: {proxy_port}")
+                rprint(f"Using IP Address: {proxy_address} at Port: {proxy_port}")
+            else:
+                rprint(f"IP {proxy_address}:{proxy_port} is not working. Skipping...")
+                continue  # Skip using this proxy
         try:
             driver.get(website_url)
 
